@@ -8,9 +8,13 @@ import { Batch } from '../models/Batch.js';
  */
 export const combineDateTime = (date, time) => {
   const [hours, minutes] = time.split(':').map(Number);
-  const dateTime = new Date(date);
-  dateTime.setHours(hours, minutes, 0, 0);
-  return dateTime;
+  
+  // Create date object in IST (Indian Standard Time)
+  // We construct an ISO string with +05:30 offset
+  // Format: YYYY-MM-DDTHH:mm:00.000+05:30
+  const dateTimeString = `${date}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00.000+05:30`;
+  
+  return new Date(dateTimeString);
 };
 
 /**
