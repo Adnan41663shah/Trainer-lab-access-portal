@@ -20,9 +20,13 @@ export const config = {
   adminInviteCode: process.env.ADMIN_INVITE_CODE,
   
   cors: {
-    origin: process.env.CLIENT_ORIGIN 
+    origin: (process.env.CLIENT_ORIGIN 
       ? process.env.CLIENT_ORIGIN.split(',').map(origin => origin.trim()) 
-      : 'http://localhost:5173',
+      : []).concat([
+        'http://localhost:5173',
+        'https://trainer-lab-access-portal.vercel.app',
+        'https://trainer-lab-access-portal-client-7vrw8j0xw.vercel.app'
+      ]),
     credentials: true
   }
 };
