@@ -35,7 +35,6 @@ const corsOptions = {
 
 // Apply CORS globally
 app.use(cors(corsOptions));
-app.options("/*", cors(corsOptions));
 
 /* =========================
    TRUST PROXY (VERCEL)
