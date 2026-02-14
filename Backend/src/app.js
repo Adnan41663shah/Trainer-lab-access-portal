@@ -10,6 +10,9 @@ import userRoutes from './routes/user.routes.js';
 
 const app = express();
 
+// Trust proxy (required for Vercel/proxies)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 
