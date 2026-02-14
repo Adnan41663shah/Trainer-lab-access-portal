@@ -36,8 +36,6 @@ const corsOptions = {
 // Apply CORS globally
 app.use(cors(corsOptions));
 
-// Explicitly handle preflight requests
-app.options("*", cors(corsOptions));
 
 /* =========================
    TRUST PROXY (VERCEL)
