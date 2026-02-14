@@ -3,6 +3,11 @@ import { config } from '../config/env.js';
 
 export const connectDB = async () => {
   try {
+    // Check if already connected or connecting
+    if (mongoose.connection.readyState >= 1) {
+      return;
+    }
+
     const conn = await mongoose.connect(config.mongo.uri);
     
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);

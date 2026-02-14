@@ -21,4 +21,15 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Check if running on Vercel
+if (process.env.VERCEL) {
+    // In Vercel, we export the app for serverless execution
+    // Mongoose buffers commands, so we can fire connection without awaiting
+    connectDB().catch(err => console.error("Vercel DB Connect Error", err));
+    console.log("🚀 Server running in Vercel Mode");
+} else {
+    // Local development
+    startServer();
+}
+
+export default app;
