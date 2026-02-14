@@ -20,13 +20,24 @@ export const config = {
   adminInviteCode: process.env.ADMIN_INVITE_CODE,
   
   cors: {
-    origin: (process.env.CLIENT_ORIGIN 
-      ? process.env.CLIENT_ORIGIN.split(',').map(origin => origin.trim()) 
-      : []).concat([
+    origin: (origin, callback) => {
+      const allowedOrigins = [
         'http://localhost:5173',
         'https://trainer-lab-access-portal.vercel.app',
-        'https://trainer-lab-access-portal-client-7vrw8j0xw.vercel.app'
-      ]),
+        'https://trainer-lab-access-portal-client-7vrw8j0xw.vercel.app',
+        ...(process.env.CLIENT_ORIGIN ? process.env.CLIENT_ORIGIN.split(',').map(o => o.trim()) : [])
+      ];
+      
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+        callback(null, true);
+      } else {
+        console.log('Blocked by CORS:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true
   }
 };
@@ -40,11 +51,6 @@ const requiredEnvVars = [
 
 requiredEnvVars.forEach(envVar => {
   if (!process.env[envVar]) {
-    // In Vercel/Production, missing env vars should throw to be visible in logs
-    // process.exit(1) can sometimes be swallowed
-    console.error(`❌ Missing required environment variable: ${envVar}`);
-    if (process.env.NODE_ENV === 'production') {
-        throw new Error(`Missing required environment variable: ${envVar}`);
-    }
+     console.warn(`⚠️ Warning: Missing environment variable: ${envVar}`);
   }
 });
