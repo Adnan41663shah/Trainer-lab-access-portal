@@ -60,7 +60,7 @@ export const setAccessTokenCookie = (res, token) => {
   res.cookie('accessToken', token, {
     httpOnly: true,
     secure: config.nodeEnv === 'production',
-    sameSite: 'lax',
+    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
     maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
     path: '/'
   });
@@ -75,9 +75,9 @@ export const setRefreshTokenCookie = (res, token) => {
   res.cookie('refreshToken', token, {
     httpOnly: true,
     secure: config.nodeEnv === 'production',
-    sameSite: 'lax',
+    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/api/auth/refresh'
+    path: '/' // Changed to root path to avoid path matching issues
   });
 };
 
