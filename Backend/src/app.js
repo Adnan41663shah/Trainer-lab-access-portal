@@ -62,12 +62,19 @@ app.use((req, res, next) => {
 
 
 // Health check endpoint
+// Health check endpoint
 app.get('/health', (req, res) => {
+  console.log('Health check endpoint hit');
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     environment: config.nodeEnv
   });
+});
+
+// Root endpoint for verification
+app.get('/', (req, res) => {
+  res.send('Trainer Lab Access Portal API Running');
 });
 
 // API routes
