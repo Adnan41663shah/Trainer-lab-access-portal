@@ -8,6 +8,12 @@ export const connectDB = async () => {
       return;
     }
 
+    // Prevent localhost connection in Vercel to avoid timeouts
+    if (process.env.VERCEL && config.mongo.uri.includes('localhost')) {
+      console.warn('⚠️  MONGO_URI not set in Vercel. Skipping DB connection to prevent crash.');
+      return; 
+    }
+
     const conn = await mongoose.connect(config.mongo.uri);
     
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
