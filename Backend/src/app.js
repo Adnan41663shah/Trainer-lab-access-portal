@@ -14,9 +14,20 @@ const app = express();
    CORS CONFIGURATION
 ========================= */
 
+// Production origins
 const allowedOrigins = [
   "https://trainer-lab-access-portal.vercel.app"
 ];
+
+// Add localhost origins in development mode only
+if (config.nodeEnv === "development") {
+  allowedOrigins.push(
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000"
+  );
+}
 
 const corsOptions = {
   origin: (origin, callback) => {
