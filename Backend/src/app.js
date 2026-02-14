@@ -19,15 +19,7 @@ app.use(helmet());
 // CORS configuration
 // CORS configuration
 app.use(cors({
-  origin: config.cors.origin,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
-}));
-
-// Handle preflight requests explicitly
-app.options(/(.*)/, cors({
-  origin: config.cors.origin,
+  origin: true, // Reflects the request origin, allowing all origins with credentials
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
