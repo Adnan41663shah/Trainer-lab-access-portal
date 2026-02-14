@@ -72,11 +72,6 @@ app.get('/', (req, res) => {
   res.send('Trainer Lab Access Portal API Running');
 });
 
-// Handle OPTIONS requests for CORS preflight
-app.options('*', (req, res) => {
-  res.status(200).end();
-});
-
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/batches', batchRoutes);
