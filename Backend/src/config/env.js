@@ -34,7 +34,11 @@ const requiredEnvVars = [
 
 requiredEnvVars.forEach(envVar => {
   if (!process.env[envVar]) {
+    // In Vercel/Production, missing env vars should throw to be visible in logs
+    // process.exit(1) can sometimes be swallowed
     console.error(`❌ Missing required environment variable: ${envVar}`);
-    process.exit(1);
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error(`Missing required environment variable: ${envVar}`);
+    }
   }
 });

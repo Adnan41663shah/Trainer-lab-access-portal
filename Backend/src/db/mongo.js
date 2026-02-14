@@ -30,6 +30,11 @@ export const connectDB = async () => {
     
   } catch (error) {
     console.error('❌ Error connecting to MongoDB:', error.message);
-    process.exit(1);
+    // Do not exit process in Vercel environment, let the function fail or retry
+    if (!process.env.VERCEL) {
+        process.exit(1);
+    } else {
+        throw error;
+    }
   }
 };
