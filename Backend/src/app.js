@@ -1,86 +1,130 @@
-import express from 'express';
-import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
-import cors from 'cors';
-import { config } from './config/env.js';
-import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
-import authRoutes from './routes/auth.routes.js';
-import batchRoutes from './routes/batch.routes.js';
-import userRoutes from './routes/user.routes.js';
+import express from "express";
+import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import cors from "cors";
+import { config } from "./config/env.js";
+import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
+import authRoutes from "./routes/auth.routes.js";
+import batchRoutes from "./routes/batch.routes.js";
+import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 
-// Trust proxy (required for Vercel/proxies)
-app.set('trust proxy', 1);
+/* =========================
+   CORS CONFIGURATION
+========================= */
 
-// Security middleware
-app.use(helmet());
+const allowedOrigins = [
+  "https://trainer-lab-access-portal.vercel.app"
+];
 
-// CORS configuration
-// CORS configuration
-app.use(cors({
-  origin: true, // Reflects the request origin, allowing all origins with credentials
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow tools like Postman
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
-}));
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
 
-// Body parser middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Apply CORS globally
+app.use(cors(corsOptions));
 
-// Cookie parser
+// Explicitly handle preflight requests
+app.options("*", cors(corsOptions));
+
+/* =========================
+   TRUST PROXY (VERCEL)
+========================= */
+
+app.set("trust proxy", 1);
+
+/* =========================
+   SECURITY MIDDLEWARE
+========================= */
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false
+  })
+);
+
+/* =========================
+   BODY PARSERS
+========================= */
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+/* =========================
+   COOKIE PARSER
+========================= */
+
 app.use(cookieParser());
 
-// Custom MongoDB injection prevention middleware (Express 5.x compatible)
+/* =========================
+   MONGO SANITIZER
+========================= */
+
 app.use((req, res, next) => {
   const sanitize = (obj) => {
-    if (obj && typeof obj === 'object') {
-      Object.keys(obj).forEach(key => {
-        if (key.startsWith('$') || key.includes('.')) {
+    if (obj && typeof obj === "object") {
+      Object.keys(obj).forEach((key) => {
+        if (key.startsWith("$") || key.includes(".")) {
           delete obj[key];
-        } else if (typeof obj[key] === 'object') {
+        } else if (typeof obj[key] === "object") {
           sanitize(obj[key]);
         }
       });
     }
-    return obj;
   };
-  
+
   if (req.body) sanitize(req.body);
   if (req.query) sanitize(req.query);
   if (req.params) sanitize(req.params);
-  
+
   next();
 });
 
+/* =========================
+   HEALTH CHECK
+========================= */
 
-
-// Health check endpoint
-// Health check endpoint
-app.get('/health', (req, res) => {
-  console.log('Health check endpoint hit');
+app.get("/health", (req, res) => {
   res.json({
-    status: 'ok',
+    status: "ok",
     timestamp: new Date().toISOString(),
     environment: config.nodeEnv
   });
 });
 
-// Root endpoint for verification
-app.get('/', (req, res) => {
-  res.send('Trainer Lab Access Portal API Running');
+/* =========================
+   ROOT ENDPOINT
+========================= */
+
+app.get("/", (req, res) => {
+  res.send("Trainer Lab Access Portal API Running");
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/batches', batchRoutes);
-app.use('/api/users', userRoutes);
+/* =========================
+   API ROUTES
+========================= */
 
-// 404 handler
+app.use("/api/auth", authRoutes);
+app.use("/api/batches", batchRoutes);
+app.use("/api/users", userRoutes);
+
+/* =========================
+   ERROR HANDLING
+========================= */
+
 app.use(notFoundHandler);
-
-// Error handler (must be last)
 app.use(errorHandler);
 
 export default app;
